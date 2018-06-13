@@ -15,17 +15,29 @@ def main(product_link, output_path="./data", massive_json={}):
     final_object = {}
 
     # Image Download
-    image_list = []
-    image_count = 1
-    for url in soup.find_all("a"):
-        if url.get('class') is not None and '_seoImg' in url.get('class'):
-            processed_link = "https:" + "/".join(url.get("href").split("/")[:16] + ["1920"] + url.get("href").split("/")[17:]).split("?")[0]
+    description=""
+    image=""
+    image_list=[]
+    image_count=0
+    title=""
 
-            file_output = os.path.join(output_path, processed_link.split("/")[-1])
-            image_list.append({"filename":processed_link.split("/")[-1], "id":image_count, "url":processed_link})
-            image_count += 1
+    for elem in soup.find_all("h1"):
+        title=elem.text
 
-            subprocess.run(["wget", "-O", file_output, processed_link])
+    #print out description of product
+    for elem in soup.find_all("script",{"type":"application/ld+json"}):
+        json_object=json.loads(elem.text)
+        image=json_object["image"]
+        description=json_object["description"]
+        
+
+    for link in image:
+        processed_link = link
+
+        file_output = os.path.join(output_path, str(image_count)+processed_link.split("/")[-1])
+        image_list.append({"filename":str(image_count)+processed_link.split("/")[-1], "id":image_count, "url":processed_link})
+        image_count+=1
+        subprocess.run(["wget", "-O", file_output, processed_link])
 
     assert len(image_list) > 0
     shared_id = image_list[-1]["filename"].split("_")[0]
@@ -37,44 +49,34 @@ def main(product_link, output_path="./data", massive_json={}):
         first_download_of_item = True
 
     final_object['images'] = image_list
-    final_object["info"] = {'year': 2018, "description": "ZARA Dataset", 'id':shared_id, "product_url": product_link}
+    final_object["info"] = {'year': 2018, "description": "Macy's Dataset", 'id':shared_id, "product_url": product_link}
 
     # Composition and Price
     composition = []
-    composition_string = []
     price = None
     json_object = None
+    
+    l1list = []
+    title_instances = soup.find_all("u1", {"data-auto":"product-description-bullets"}, "l1")
+    length = len(title_instances)
+    for x in range(0,length):
+        if x != "Web ID":
+            l1list.append(x)
+    
+    index = len(l1list)-3
+    composition.append(l1list[index])
+
+
     for script in soup.find_all('script', {'type': "text/javascript"}):
         if "material" in script.text:
             try:
-                json_object = json.loads(script.text.split(" = ")[2].rstrip(';window.zara.viewPayload'))
-                for detailed_composition_part in json_object["product"]['detail']['detailedComposition']['parts']:
-
-                    composition.append(detailed_composition_part['description'])
-                    composition.extend(detailed_composition_part['components'])
-                    composition_string.append(detailed_composition_part['description'])
-
-                    if len(detailed_composition_part['components']) != 0:
-                        for parts in detailed_composition_part['components']:
-                            composition_string.append(parts["material"])
-                    else:
-                        for area in detailed_composition_part['areas']:
-                            composition.append(area['description'])
-                            composition.extend(area['components'])
-                            composition_string.append(area['description'])
-
-                            for parts in area['components']:
-                                composition_string.append(parts["material"])
-
                 price = json_object["product"]['price']
             except Exception as e:
                 print("Failed to parse correct text/javascript segment", e)
 
                 title_instances = soup.find_all({"type": "application/ld+json"}, "offers", "price")
                 assert len(title_instances) < 2
-                price = title_instances[0].text
-            #break
-    composition_string = " ".join(composition_string)
+                price = title_instances[0].texts
     
     # Color
     try:
@@ -116,7 +118,7 @@ def main(product_link, output_path="./data", massive_json={}):
     categories.append(title_instances[0].text)
 
     final_object["annotation"] = {"categories": categories, "title": title, "color": color, "price": price,
-                                  "description": description, "content": composition, "composition_string": composition_string}
+                                  "description": description, "content": composition}
 
     return final_object, final_object['info']['id'], first_download_of_item
 
