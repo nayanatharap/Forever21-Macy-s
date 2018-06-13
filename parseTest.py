@@ -1,13 +1,14 @@
 import bs4 as bs
 from urllib.request import Request, urlopen
 
-import json, os
+import json, os, sys
 
 import subprocess,time
 
 import logging
 
 from lxml import etree
+
 
 exp_name = 'Forever21_' + time.time().__str__()
 logging.basicConfig(filename=exp_name + ".log", level=logging.INFO)
@@ -16,7 +17,7 @@ output_path = "./" + exp_name + "_data"
 os.makedirs(output_path, exist_ok=False)
 
 #Obtaining information from webste to lxml form
-req = Request("https://www.forever21.com/us/shop/catalog/product/f21/women-new-arrivals/2000262551", headers={'User-Agent': 'Mozilla/5.0'})
+req = Request("https://www.forever21.com/us/shop/Catalog/Product/f21/app-main/2000256354", headers={'User-Agent': 'Mozilla/5.0'})
 sauce = urlopen(req).read()
 soup = bs.BeautifulSoup(sauce, "lxml")
 
@@ -64,6 +65,7 @@ composition_stringFull=""
 composition_string=""
 tempList=[]
 tempCompList=[]
+composition=[]
 index=0
 
 
@@ -95,20 +97,36 @@ for num in range(0,len(composition_List)):
 for elem in tempList:
     if not is_number(elem):
         composition_string+=elem+" "
-
+print (composition_stringFull)
 print (composition_string)
 print (composition_stringFull)
 
+#Create composition list
+composition_stringFull=composition_stringFull.replace(":"," : ")
+composition_stringFull=composition_stringFull.replace(","," ,")
+composition_stringFull=composition_stringFull.replace("-"," - ")
+
+
+tempCompList=composition_stringFull.split(" ")
+
+for x in range (0,len(tempCompList)):
+    if tempCompList[x] is ':':
+        composition.append(tempCompList[x-1])
+    elif is_number(tempCompList[x][0]):
+        smallList=tempCompList[x].split("%")
+        composition.append("Material:"+smallList[1]+" , " + "Percentage: "+ smallList[0])
+
+print (composition)
 
 
 
-# color=""
+color=[]
 
-
-# for elem in soup.find_all("script",{"type":"text/javascript"}):
-#     if "ColorName" in elem.text:
-#         try:
-#             json_object=json.loads(elem.text)
-#             color=json_object["ColorName"]
-#         except (ValueError):
-#             print("Parse failed for color")
+for elem in soup.find_all("script",{"type":"text/javascript"}):
+    if "ColorName" in elem.text:
+        try:
+            text=elem.text.rstrip("var brand, category, productId, variantId;")
+            json_object = json.loads(text)
+            color=color.append(json_object["ColorName"])
+        except (ValueError):
+            print ("could not parse")
