@@ -16,7 +16,7 @@ output_path = "./" + exp_name + "_data"
 os.makedirs(output_path, exist_ok=False)
 
 
-url = "https://www.macys.com/shop/product/bar-iii-halter-maxi-dress-created-for-macys?ID=6589098&CategoryID=5449#fn=SPECIAL_OCCASIONS%3DDaytime%26SIZE%3D%26sp%3D1%26spc%3D2430%26ruleId%3D133%7CBOOST%20ATTRIBUTE%7CBOOST%20SAVED%20SET%26searchPass%3DmatchNone%26slotId%3D1"
+url = "https://www.macys.com/shop/womens-clothing?id=118&cm_sp=us_hdr-_-women-_-118_women"
 
 headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
 
@@ -25,8 +25,8 @@ sauce=data.text
 soup = bs.BeautifulSoup(sauce, "lxml")
 
 # Hard coded filtering for woman products
-woman_product_type_list = list(filter(lambda x: "woman" in x[0] or "trf" in x[0], [(k.get("href"), k.text)
-                                                                                   for k in soup.find_all("a", {"class": "_category-link"})]))
+#woman_product_type_list = list(filter(lambda x: "woman" in x[0], [(k.get("href"), k.text)
+#                                                                                   for k in soup.find_all("a", {"class": "_category-link"})]))
 view_all_list = set(t[0] for t in filter(lambda x: x[1].lower() == "view all", woman_product_type_list))
 woman_product_type_set = set([k[0] for k in woman_product_type_list]) - view_all_list
 
