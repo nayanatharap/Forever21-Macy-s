@@ -1,7 +1,7 @@
 import bs4 as bs
 from urllib.request import Request, urlopen
 
-import parseTest, json
+import parseTemp, json
 
 import pandas as pd
 
@@ -41,7 +41,7 @@ for elem in woman_product_type_set:
 
 final_object={}
 json_object={}
-print(woman_product_type_set)
+
 listItems=[]
 for product_type_link in tqdm.tqdm(woman_product_type_set):
 
@@ -70,32 +70,29 @@ for product_type_link in tqdm.tqdm(woman_product_type_set):
                     listItems.append(json_object["ProductShareLinkUrl"])
                 except(ValueError):
                     continue
-
-        try:
-            for product_link in listItems:
-                print (product_link)
-                final_object, id, first_download_of_item = parseTest.main(product_link, output_path, massive_json)
+        for product_link in listItems:
+            try:
+                final_object, id, first_download_of_item = parseTemp.main(product_link, output_path, massive_json)
                 if not first_download_of_item:
                     num_multiple_category_items += 1
                     print("Item_clash_for", id)
                     continue
+            except Exception as e:
+                print("Parse failed with ", e)
+                
 
-        except Exception as e:
-            print("Parse failed with ", e)
-            continue
+            massive_json[id] = final_object
 
-        massive_json[id] = final_object
+            color.append(final_object["annotation"]["color"])
+            title.append(final_object["annotation"]["title"])
+            description.append(final_object["annotation"]["description"])
+            content.append(final_object["annotation"]["composition_string"])
+            url_list.append(final_object['info']['product_url'])
+            items_downloaded += 1
 
-        color.append(final_object["annotation"]["color"])
-        title.append(final_object["annotation"]["title"])
-        description.append(final_object["annotation"]["description"])
-        content.append(final_object["annotation"]["composition_string"])
-        url_list.append(final_object['info']['product_url'])
-        items_downloaded += 1
-
-        print("items_downloaded", items_downloaded)
-        if items_downloaded > total_items_need:
-            break
+            print("items_downloaded", items_downloaded)
+            if items_downloaded > total_items_need:
+                break
 
     json.dump(massive_json, open(exp_name + "_details.json", "w"))
 
