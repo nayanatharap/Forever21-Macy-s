@@ -2,7 +2,7 @@ import bs4 as bs
 from urllib.request import Request, urlopen
 
 import json, os, sys
-
+import requests
 import subprocess,time
 
 import logging
@@ -17,8 +17,9 @@ output_path = "./" + exp_name + "_data"
 os.makedirs(output_path, exist_ok=False)
 
 #Obtaining information from webste to lxml form
-req = Request("https://www.forever21.com/us/shop/Catalog/Product/f21/app-main/2000256354", headers={'User-Agent': 'Mozilla/5.0'})
-sauce = urlopen(req).read()
+
+req = requests.get("https://www.forever21.com/us/shop/Catalog/Product/F21/dress/2000297469", headers={'User-Agent': 'Mozilla/5.0'})
+sauce = req.text
 soup = bs.BeautifulSoup(sauce, "lxml")
 
 final_object={}
@@ -126,13 +127,27 @@ print (composition)
 
 #Obtain color
 color=[]
+tempColor=[]
 
 for elem in soup.find_all("script",{"type":"text/javascript"}):
     if "ColorName" in elem.text:
-        print (elem.text)
         try:
-            text=elem.text.rstrip("var brand, category, productId, variantId;")
+            tempColor=elem.text.split("var pData =")
+            tempColor=tempColor[1].split("brand =")
+            tempColor=tempColor[0].rsplit(";",1)
+            text=tempColor[0]
             json_object = json.loads(text)
-            color=color.append(json_object["ColorName"])
+            for index in range (0,5):
+                try:
+                    color.append(json_object["Variants"][index]["ColorName"])
+                except (IndexError):
+                    break
         except (ValueError):
             print ("could not parse")
+
+print (color)
+
+for elem in soup.find_all("meta",{"property":"og/description"}):
+    json_object=json.loads(elem.text)
+    print (json_object)
+    print (json_object["content"])
