@@ -32,22 +32,48 @@ massive_json = {}
 color, title, description, content, url_list = [], [], [], [], []
 
 for elem in woman_product_type_set:
-    woman_product_type_set.add("https://www.forever21.com"+elem)
-    woman_product_type_set.remove(elem)
+   # print("https://www.forever21.com"+elem)
+    if (elem[0] is '/'):
+        woman_product_type_set.add("https://www.forever21.com"+elem)
+        woman_product_type_set.remove(elem)
 
-ListItems=[]
+
+
+final_object={}
+json_object={}
 print(woman_product_type_set)
+listItems=[]
 for product_type_link in tqdm.tqdm(woman_product_type_set):
 
     soup_product_type_page = bs.BeautifulSoup(urlopen(Request(product_type_link, headers={'User-Agent': 'Mozilla/5.0'})).read(), "lxml")
 
     for item in soup_product_type_page.find_all("script", {'type':"text/javascript"}):
-        if "ProductShareLinkUrl" in item:
-            json_object=item.text
-            listItems=json_object["ProductShareLinkUrl"]
+        if not "ProductShareLinkUrl" in item.text:
+            continue
+        elif "ProductShareLinkUrl" in item.text:
+            tempList=item.text.split("CatalogProducts")
+            tempList=tempList[1].split("CategoryCustomerNote")
+            tempList=tempList[0].rsplit("],",1)
+
+            
+
+            tempList2=tempList[0].split("BackorderedQuantity")
+            tempList2[0]=tempList2[0][3:]
+            tempList2.remove(tempList2[0])
+
+            for elem in tempList2:
+                try:
+                    tempList=elem.rsplit(",{",1)
+                    elem='{"BackorderedQuantity'+tempList[0]
+
+                    json_object=json.loads(elem)
+                    listItems.append(json_object["ProductShareLinkUrl"])
+                except(ValueError):
+                    continue
 
         try:
             for product_link in listItems:
+                print (product_link)
                 final_object, id, first_download_of_item = parseTest.main(product_link, output_path, massive_json)
                 if not first_download_of_item:
                     num_multiple_category_items += 1
