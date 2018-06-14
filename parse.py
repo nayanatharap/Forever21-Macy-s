@@ -1,8 +1,6 @@
 import bs4 as bs
 from urllib.request import Request, urlopen
-
 import json, os
-
 import subprocess
 
 
@@ -58,9 +56,8 @@ def main(product_link, output_path="./data", massive_json={}):
     
     l1list = []
     title_instances = soup.find_all("u1", {"data-auto":"product-description-bullets"}, "l1")
-    length = len(title_instances)
-    for x in range(0,length):
-        if x != "Web ID":
+    for x in range(0,len(title_instances)):
+        if title_instances[x] != "Web ID":
             l1list.append(x)
     
     index = len(l1list)-3

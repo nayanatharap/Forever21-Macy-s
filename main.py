@@ -1,12 +1,8 @@
 import bs4 as bs
 from urllib.request import Request, urlopen
-
 import parse, json
-
 import pandas as pd
-
 import tqdm, time, os
-
 import logging
 
 exp_name = 'Macys_' + time.time().__str__()
