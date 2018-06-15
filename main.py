@@ -21,8 +21,8 @@ sauce=data.text
 soup = bs.BeautifulSoup(sauce, "lxml")
 
 # Hard coded filtering for woman products
-#woman_product_type_list = list(filter(lambda x: "woman" in x[0], [(k.get("href"), k.text)
-#                                                                                   for k in soup.find_all("a", {"class": "_category-link"})]))
+woman_product_type_list = list(filter(lambda x: "Women" in x[0], [(k.get("href"), k.text)
+                                                                                   for k in soup.find_all("a", {"class": "flexLabelLinksContainer"})]))
 view_all_list = set(t[0] for t in filter(lambda x: x[1].lower() == "view all", woman_product_type_list))
 woman_product_type_set = set([k[0] for k in woman_product_type_list]) - view_all_list
 

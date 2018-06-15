@@ -1,6 +1,7 @@
 import bs4 as bs
 from urllib.request import Request, urlopen
 import json, os
+import requests
 import subprocess
 
 
