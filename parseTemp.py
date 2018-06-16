@@ -82,7 +82,7 @@ def main(product_link,output_path="./data",massive_json={}):
     words=detail.split("Content")
     description=words[0]
     wordsTwo=words[1].split("Care - ")
-    wordsTwo[1].replace("Machine","Hand")
+    wordsTwo[1]=wordsTwo[1].replace("Machine","Hand")
     wordsThree=wordsTwo[1].split("- Hand")
     composition_stringFull=wordsThree[0]
 
@@ -137,7 +137,7 @@ def main(product_link,output_path="./data",massive_json={}):
                 tempColor=tempColor[0].rsplit(";",1)
                 text=tempColor[0]
                 json_object = json.loads(text)
-                for index in range (0,5):
+                for index in range (0,20):
                     try:
                         color.append(json_object["Variants"][index]["ColorName"])
                     except (IndexError):
@@ -148,13 +148,7 @@ def main(product_link,output_path="./data",massive_json={}):
     categories=""
     for elem in soup.find_all("a",{"href":"/us/shop/catalog/category/f21/app-main"}):
         categories+=elem.text
-    print (color)
-    print(title)
-    print(price)
-    print(composition_string)
-    print(composition)
-    print(description)
-    print(categories)
+    print(color)
 
     final_object["annotation"] = {"categories": categories, "title": title, "color": color, "price": price,
                                   "description": description, "content": composition, "composition_string": composition_string}    
@@ -165,4 +159,3 @@ def main(product_link,output_path="./data",massive_json={}):
 #     link="/us/shop/catalog/category/f21/"+parts
 #     for elem in soup.find_all("a",{"href":link},{"class":"block"}):
 #         print(elem.text)
-

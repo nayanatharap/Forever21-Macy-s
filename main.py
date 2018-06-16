@@ -31,6 +31,8 @@ total_items_need, items_downloaded, num_multiple_category_items = 1000000, 0, 0
 massive_json = {}
 color, title, description, content, url_list = [], [], [], [], []
 
+
+#ensure all elements of woman_product_type_set are full links
 for elem in woman_product_type_set:
    # print("https://www.forever21.com"+elem)
     if (elem[0] is '/'):
@@ -41,12 +43,12 @@ for elem in woman_product_type_set:
 
 final_object={}
 json_object={}
-
 listItems=[]
+
 for product_type_link in tqdm.tqdm(woman_product_type_set):
 
     soup_product_type_page = bs.BeautifulSoup(urlopen(Request(product_type_link, headers={'User-Agent': 'Mozilla/5.0'})).read(), "lxml")
-
+#Only search through text if it contains url
     for item in soup_product_type_page.find_all("script", {'type':"text/javascript"}):
         if not "ProductShareLinkUrl" in item.text:
             continue
@@ -55,21 +57,25 @@ for product_type_link in tqdm.tqdm(woman_product_type_set):
             tempList=tempList[1].split("CategoryCustomerNote")
             tempList=tempList[0].rsplit("],",1)
 
-            
+#parse through elements of list
 
             tempList2=tempList[0].split("BackorderedQuantity")
             tempList2[0]=tempList2[0][3:]
+#Check this line, messes up the first product link
             tempList2.remove(tempList2[0])
 
             for elem in tempList2:
                 try:
-                    tempList=elem.rsplit(",{",1)
-                    elem='{"BackorderedQuantity'+tempList[0]
+#Obtain the url from each item
+                    tempList3=elem.rsplit(",{",1)
+                    elem='{"BackorderedQuantity'+tempList3[0]
 
                     json_object=json.loads(elem)
                     listItems.append(json_object["ProductShareLinkUrl"])
                 except(ValueError):
                     continue
+
+#Iterate through links in listItems
         for product_link in listItems:
             try:
                 final_object, id, first_download_of_item = parseTemp.main(product_link, output_path, massive_json)
