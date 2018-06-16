@@ -100,19 +100,19 @@ for product_type_link in tqdm.tqdm(woman_product_type_set):
             if items_downloaded > total_items_need:
                 break
 
-    json.dump(massive_json, open(exp_name + "_details.json", "w"))
+            json.dump(massive_json, open(exp_name + "_details.json", "w"))
 
-    data_frame = pd.DataFrame()
-    data_frame["color"] = color
-    data_frame['title'] = title
-    data_frame['description'] = description
-    data_frame["content"] = content
-    data_frame["url_list"] = url_list
+            data_frame = pd.DataFrame()
+            data_frame["color"] = color
+            data_frame['title'] = title
+            data_frame['description'] = description
+            data_frame["content"] = content
+            data_frame["url_list"] = url_list
 
-    data_frame.to_excel(exp_name + "_statistics.xlsx")
+            data_frame.to_excel(exp_name + "_statistics.xlsx")
 
-    logging.info(product_type_link + " finished and total number till now - " + str(items_downloaded))
-    logging.info("Total items_in_multiple_categories till now - " + str(num_multiple_category_items))
+            logging.info(product_type_link + " finished and total number till now - " + str(items_downloaded))
+            logging.info("Total items_in_multiple_categories till now - " + str(num_multiple_category_items))
 
-    if items_downloaded > total_items_need:
-        break
+            if items_downloaded > total_items_need:
+                break
