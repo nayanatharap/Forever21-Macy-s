@@ -62,8 +62,9 @@ def main(product_link, output_path="./data", massive_json={}):
         except IndexError as e:
             break
 
-    # Title
+    # Title and Brand
     title = json_object['name']
+    brand = json_object['brand']["name"]
 
     # Description
     description = json_objec['description']
@@ -79,7 +80,7 @@ def main(product_link, output_path="./data", massive_json={}):
 
     categories = newname[0]
 
-    final_object["annotation"] = {"categories": categories, "title": title, "color": color, "price": price,
+    final_object["annotation"] = {"categories": categories, "title": title, "brand": brand, "color": color, "price": price,
                                   "description": description, "content": composition, "attributes": attributes}
 
     return final_object, final_object['info']['id'], first_download_of_item
