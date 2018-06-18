@@ -14,109 +14,73 @@ def main(product_link, output_path="./data", massive_json={}):
     final_object = {}
 
     # Image Download
-    description=""
-    image=""
-    image_list=[]
-    image_count=0
-    title=""
+    imagesList=[]
+    for index in range (0,5):
+        try:
+            for elem in soup.find_all("li",{"class":"main-image swiper-slide","data-index":index}):
+                for image in elem.find_all("img"):
+                    if index==0:
+                        imagesList.append(image.get("src"))
+                    else:
+                        imagesList.append(image.get("data-src"))
+        except IndexError:
+            break
 
-    for elem in soup.find_all("h1"):
-        title=elem.text
-
-    #print out description of product
-    for elem in soup.find_all("script",{"type":"application/ld+json"}):
-        json_object=json.loads(elem.text)
-        image=json_object["image"]
-        description=json_object["description"]
-        
-
-    for link in image:
-        processed_link = link
-
-        file_output = os.path.join(output_path, str(image_count)+processed_link.split("/")[-1])
-        image_list.append({"filename":str(image_count)+processed_link.split("/")[-1], "id":image_count, "url":processed_link})
-        image_count+=1
-        subprocess.run(["wget", "-O", file_output, processed_link])
-
-    assert len(image_list) > 0
-    shared_id = image_list[-1]["filename"].split("_")[0]
-
-    if shared_id in massive_json:
-        first_download_of_item = False
-        return massive_json[shared_id], massive_json[shared_id]['info']['id'], first_download_of_item
-    else:
-        first_download_of_item = True
-
-    final_object['images'] = image_list
-    final_object["info"] = {'year': 2018, "description": "Macy's Dataset", 'id':shared_id, "product_url": product_link}
-
-    # Composition and Price
-    composition = []
-    price = None
     json_object = None
-    
-    l1list = []
-    title_instances = soup.find_all("u1", {"data-auto":"product-description-bullets"}, "l1")
-    for x in range(0,len(title_instances)):
-        if title_instances[x] != "Web ID":
-            l1list.append(x)
-    
-    index = len(l1list)-3
-    composition.append(l1list[index])
+    json_object={}
 
+    # Composition
+    composition = []
 
-    for script in soup.find_all('script', {'type': "text/javascript"}):
-        if "material" in script.text:
-            try:
-                price = json_object["product"]['price']
-            except Exception as e:
-                print("Failed to parse correct text/javascript segment", e)
+    for item in soup.find_all("ul",{"data-auto":"product-description-bullets"}):
+        for elem in item.find_all("li"):
+            listItems.append(elem.text)
 
-                title_instances = soup.find_all({"type": "application/ld+json"}, "offers", "price")
-                assert len(title_instances) < 2
-                price = title_instances[0].texts
-    
+    for x in range (0, len(listItems)):
+        if "washable" in listItems[x]:
+            composition=listItems[x-1]
+        else:
+            continue
+
+    # Price
+    price = None
+    for script in soup.find_all('script', {'type': "application/ld+json"}):`
+        json_object=json.loads(script.text)
+        price = json_object["offers"][0]['price']
+   
+    # Attributes
+    attributes = []
+    for item in soup.find_all("ul",{"data-auto":"product-description-bullets"}):
+        for elem in item.find_all("li"):
+            attributes.append(elem.text)
+
     # Color
-    try:
-        color = json_object["product"]['detail']['colors'][0]["name"]
-    except Exception as e:
-        print("Failed to parse json_object from text/javascript segment for color", e)
-
-        find_color_instances = soup.find_all({"type": "application/ld+json"}, "offers", "color")
-        assert len(find_color_instances) < 2
-
-        color = find_color_instances[0].find("span", {"class": "_colorName"}).text
+    color = []
+    for x in range(0,10):
+        try:
+            color.append(json_object["offers"][x]["itemOffered"]["color"])
+        except IndexError as e:
+            break
 
     # Title
-    try:
-        title = json_object["product"]['name']
-    except Exception as e:
-        print("Failed to parse json_object from text/javascript segment for title", e)
-
-        
-        title_instances = soup.find_all({"type": "application/ld+json"}, "name")
-        assert len(title_instances) < 2
-        title = title_instances[0].text
+    title = json_object['name']
 
     # Description
-    description = None
-    try:
-        description = json_object["product"]['description'].split("\n\n")[0]
-    except Exception as e:
-        print("Failed to parse json_object from text/javascript segment for description", e)
+    description = json_objec['description']
 
-        title_instances = soup.find_all({"type": "application/ld+json"}, "description")
-        assert len(title_instances) < 2
-        # Can be improved by filtering height of model
-        title = title_instances[0].text
+    # Categories
+    categories = ""
+    name = []
+    newname = []
+    
+    for item in soup.find_all("title"):
+        name = item.text.split(title)
+        newname = name[1].split("- Macy's")
 
-    categories = []
-    soup.find_all({"type": "application/ld+json"}, "category")
-    assert len(title_instances) < 2
-    categories.append(title_instances[0].text)
+    categories = newname[0]
 
     final_object["annotation"] = {"categories": categories, "title": title, "color": color, "price": price,
-                                  "description": description, "content": composition}
+                                  "description": description, "content": composition, "attributes": attributes}
 
     return final_object, final_object['info']['id'], first_download_of_item
 

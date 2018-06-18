@@ -4,6 +4,7 @@ import parse, json
 import pandas as pd
 import tqdm, time, os
 import logging
+import requests
 
 exp_name = 'Macys_' + time.time().__str__()
 logging.basicConfig(filename=exp_name + ".log", level=logging.INFO)
@@ -12,30 +13,44 @@ output_path = "./" + exp_name + "_data"
 os.makedirs(output_path, exist_ok=False)
 
 
-url = "https://www.macys.com/shop/womens-clothing?id=118&cm_sp=us_hdr-_-women-_-118_women"
+url = "https://www.macys.com/"
 
 headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
 
 data = requests.get(url, headers=headers)
 sauce=data.text
 soup = bs.BeautifulSoup(sauce, "lxml")
+woman_product_type_list=[]
+woman_product_type_list2=[]
+for item in soup.find_all('script', {'type': "application/json","data-mcom-header-menu-desktop":"context.header.menu"}):
 
+    json_objects = json.loads(item.text)
+
+    try:
+        for x in range(0,60):
+            woman_product_type_list.append(json_objects[0]["children"][0]["group"][0]["children"][0]["group"][x]["url"])
+    except IndexError as e:
+        break
+
+for elem in woman_product_type_list:
+    if elem[0] is "/":
+        woman_product_type_list2.append("http://www.macys.com"+elem)
+        print("https://www.macys.com"+elem)
+        
 # Hard coded filtering for woman products
-woman_product_type_list = list(filter(lambda x: "Women" in x[0], [(k.get("href"), k.text)
-                                                                                   for k in soup.find_all("a", {"class": "flexLabelLinksContainer"})]))
-view_all_list = set(t[0] for t in filter(lambda x: x[1].lower() == "view all", woman_product_type_list))
-woman_product_type_set = set([k[0] for k in woman_product_type_list]) - view_all_list
+view_all_list = set(t[0] for t in filter(lambda x: x[1].lower() == "view all", woman_product_type_list2))
+woman_product_type_set = set([k[0] for k in woman_product_type_list2]) - view_all_list
 
 # Variable initializations
 total_items_need, items_downloaded, num_multiple_category_items = 1000000, 0, 0
 massive_json = {}
-color, title, description, content, url_list = [], [], [], [], []
+color, title, description, attributes, url_list = [], [], [], [], []
 
 for product_type_link in tqdm.tqdm(woman_product_type_set):
-
+    print(product_type_link)
     soup_product_type_page = bs.BeautifulSoup(urlopen(Request(product_type_link, headers={'User-Agent': 'Mozilla/5.0'})).read(), "lxml")
 
-    for item in soup_product_type_page.find_all("a", {'class':"item _item"}):
+    for item in soup_product_type_page.find_all("a", {'class':"productDeskLink"}):
         product_link = item.get("href")
 
         try:
@@ -54,7 +69,7 @@ for product_type_link in tqdm.tqdm(woman_product_type_set):
         color.append(final_object["annotation"]["color"])
         title.append(final_object["annotation"]["title"])
         description.append(final_object["annotation"]["description"])
-        content.append(final_object["annotation"]["composition_string"])
+        attributes.append(final_object["annotation"]["attrributes"])
         url_list.append(final_object['info']['product_url'])
         items_downloaded += 1
 
@@ -68,10 +83,10 @@ for product_type_link in tqdm.tqdm(woman_product_type_set):
     data_frame["color"] = color
     data_frame['title'] = title
     data_frame['description'] = description
-    data_frame["content"] = content
+    data_frame["attributes"] = attributes
     data_frame["url_list"] = url_list
 
-    data_frame.to_excel(exp_name + "_statistic.xlsx")
+    data_frame.to_excel(exp_name + "_macysstats.xlsx")
 
     logging.info(product_type_link + " finished and total number till now - " + str(items_downloaded))
     logging.info("Total items_in_multiple_categories till now - " + str(num_multiple_category_items))
