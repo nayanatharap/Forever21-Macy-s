@@ -35,24 +35,27 @@ for item in soup.find_all('script', {'type': "application/json","data-mcom-heade
 for elem in woman_product_type_list:
     if elem[0] is "/":
         woman_product_type_list2.append("http://www.macys.com"+elem)
-        print("https://www.macys.com"+elem)
+
         
 # Hard coded filtering for woman products
-view_all_list = set(t[0] for t in filter(lambda x: x[1].lower() == "view all", woman_product_type_list2))
-woman_product_type_set = set([k[0] for k in woman_product_type_list2]) - view_all_list
+# view_all_list = set(t[0] for t in filter(lambda x: x[1].lower() == "view all", woman_product_type_list2))
+# woman_product_type_set = set([k[0] for k in woman_product_type_list2]) - view_all_list
+woman_product_type_set=set(woman_product_type_list2)
 
+
+print(woman_product_type_set)
 # Variable initializations
 total_items_need, items_downloaded, num_multiple_category_items = 1000000, 0, 0
 massive_json = {}
 color, title, description, attributes, url_list = [], [], [], [], []
 
 for product_type_link in tqdm.tqdm(woman_product_type_set):
-    print(product_type_link)
-    soup_product_type_page = bs.BeautifulSoup(urlopen(Request(product_type_link, headers={'User-Agent': 'Mozilla/5.0'})).read(), "lxml")
+    soup_product_type_page = bs.BeautifulSoup(requests.get(product_type_link, headers=headers).text, "lxml")
 
-    for item in soup_product_type_page.find_all("a", {'class':"productDeskLink"}):
+    for item in soup_product_type_page.find_all("a", {'class':"productDescLink"}):
         product_link = item.get("href")
-
+        product_link="https://macys.com"+product_link
+        print (product_link)
         try:
             final_object, id, first_download_of_item = parse.main(product_link, output_path, massive_json)
             if not first_download_of_item:
@@ -69,7 +72,7 @@ for product_type_link in tqdm.tqdm(woman_product_type_set):
         color.append(final_object["annotation"]["color"])
         title.append(final_object["annotation"]["title"])
         description.append(final_object["annotation"]["description"])
-        attributes.append(final_object["annotation"]["attrributes"])
+        attributes.append(final_object["annotation"]["attributes"])
         url_list.append(final_object['info']['product_url'])
         items_downloaded += 1
 
@@ -77,19 +80,19 @@ for product_type_link in tqdm.tqdm(woman_product_type_set):
         if items_downloaded > total_items_need:
             break
 
-    json.dump(massive_json, open(exp_name + "_details.json", "w"))
+        json.dump(massive_json, open(exp_name + "_details.json", "w"))
 
-    data_frame = pd.DataFrame()
-    data_frame["color"] = color
-    data_frame['title'] = title
-    data_frame['description'] = description
-    data_frame["attributes"] = attributes
-    data_frame["url_list"] = url_list
+        data_frame = pd.DataFrame()
+        data_frame["color"] = color
+        data_frame['title'] = title
+        data_frame['description'] = description
+        data_frame["attributes"] = attributes
+        data_frame["url_list"] = url_list
 
-    data_frame.to_excel(exp_name + "_macysstats.xlsx")
+        data_frame.to_excel(exp_name + "_macysstats.xlsx")
 
-    logging.info(product_type_link + " finished and total number till now - " + str(items_downloaded))
-    logging.info("Total items_in_multiple_categories till now - " + str(num_multiple_category_items))
+        logging.info(product_type_link + " finished and total number till now - " + str(items_downloaded))
+        logging.info("Total items_in_multiple_categories till now - " + str(num_multiple_category_items))
 
     if items_downloaded > total_items_need:
         break
