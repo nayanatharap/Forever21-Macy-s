@@ -25,6 +25,27 @@ def main(product_link, output_path="./data", massive_json={}):
                         imagesList.append(image.get("data-src"))
         except IndexError:
             break
+        image_count = 1
+        for url in imagesList:
+            
+            processed_link = url
+            file_output = os.path.join(output_path, processed_link.split("/")[-1])
+            image_list.append({"filename":processed_link.split("/")[-1], "id":image_count, "url":processed_link})
+            image_count += 1
+
+            subprocess.run(["wget", "-O", file_output, processed_link])
+
+        assert len(image_list) > 0
+        shared_id = image_list[-1]["filename"].split("_")[0]
+
+        if shared_id in massive_json:
+            first_download_of_item = False
+            return massive_json[shared_id], massive_json[shared_id]['info']['id'], first_download_of_item
+        else:
+            first_download_of_item = True
+
+        final_object['images'] = image_list
+        final_object["info"] = {'year': 2018, "description": "ZARA Dataset", 'id':shared_id, "product_url": product_link}   
 
     json_object = None
     json_object={}
