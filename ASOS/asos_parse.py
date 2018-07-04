@@ -11,114 +11,127 @@ def main(product_link, output_path="./data", massive_json={}):
     soup = bs.BeautifulSoup(sauce, "lxml")
     final_object = {}
 
-    # Image Download
-    image_list=[]
-    for index in range (0,5):
+    # # Image Download
+    # image_list=[]
+    # for index in range (0,5):
+    #     try:
+    #         for elem in soup.find_all("li",{"class":"main-image swiper-slide","data-index":index}):
+    #             for image in elem.find_all("img"):
+    #                 if index==0:
+    #                     image_list.append(image.get("src"))
+    #                 else:
+    #                     image_list.append(image.get("data-src"))
+    #     except IndexError:
+    #         break
+    #     image_count = 1
+    #     for url in image_list:
+    #         processed_link = url
+    #         file_output = os.path.join(output_path, processed_link.split("/")[-1])
+    #         image_list.append({"filename":processed_link.split("/")[-1], "id":image_count, "url":processed_link})
+    #         image_count += 1
+
+    #         subprocess.run(["wget", "-O", file_output, processed_link])
+
+    #     assert len(image_list) > 0
+    #     shared_id = image_list[-1]["filename"].split("_")[0]
+
+    #     if shared_id in massive_json:
+    #         first_download_of_item = False
+    #         return massive_json[shared_id], massive_json[shared_id]['info']['id'], first_download_of_item
+    #     else:
+    #         first_download_of_item = True
+
+    #     final_object['images'] = image_list
+    #     final_object["info"] = {'year': 2018, "description": "ASOS Dataset", 'id':shared_id, "product_url": product_link}   
+
+    # json_object = None
+    # json_object={}
+
+    # Composition and Composition String
+    composition = ""
+    composition_string = []
+    material = ""
+    material_list = []
+    materials = "Materials: "
+    check = None
+    try:
         try:
-            for elem in soup.find_all("li",{"class":"main-image swiper-slide","data-index":index}):
-                for image in elem.find_all("img"):
-                    if index==0:
-                        image_list.append(image.get("src"))
-                    else:
-                        image_list.append(image.get("data-src"))
-        except IndexError:
-            break
-        image_count = 1
-        for url in image_list:
-            processed_link = url
-            file_output = os.path.join(output_path, processed_link.split("/")[-1])
-            image_list.append({"filename":processed_link.split("/")[-1], "id":image_count, "url":processed_link})
-            image_count += 1
+            check = soup.find_all("h4","ABOUT ME", "span", "br")
+        except Exception:
+            check = soup.find_all("h4","ABOUT ME", "span")
+    except Exception:
+            composition = "N/A" 
+            composition_string = "N/A"
 
-            subprocess.run(["wget", "-O", file_output, processed_link])
-
-        assert len(image_list) > 0
-        shared_id = image_list[-1]["filename"].split("_")[0]
-
-        if shared_id in massive_json:
-            first_download_of_item = False
-            return massive_json[shared_id], massive_json[shared_id]['info']['id'], first_download_of_item
-        else:
-            first_download_of_item = True
-
-        final_object['images'] = image_list
-        final_object["info"] = {'year': 2018, "description": "ASOS Dataset", 'id':shared_id, "product_url": product_link}   
-
-    json_object = None
-    json_object={}
-
-    # Composition
-    composition = None
-    material = []
-    for item in soup.find_all("h4","ABOUT ME", "span"):
+    for item in check:
         try:   
-            name = item.text.split("main")
-            composition = name[1]
-            temp = composition
-            for x in composition:
-                if x=="%":
-                    temp1 = temp.text.split(",")
-                    temp2 = temp1[0].text.split("%")
-                    material.append(temp2[1])
-                    temp = temp[1]
+            material += item.text
+            try:
+                material_list = material.split(", ")
+            except Exception:
+                material_list.append(material)
+
+            for elem in material_list:
+                try:
+                    elem.split(": ")[1]
+                except Exception:
+                    pass
+            for elem in material_list:
+                materials += elem.split("% ")[1]
+                composition += elem.split("% ")[0] + "%"
+            composition_string = [materials, "Composition: " + composition]
+
         except Exception:
             composition = "N/A" 
 
-    # Composition String
-    composition_string = []
-    temp = composition
-    try:
-        for x in composition:
-            if x==",":
-                composition_string.append(temp.text.split(","))
-                temp = temp[1]
 
-    # Price
-    price = None
-    for script in soup.find_all('script', {'type': "text/javascript"}):
-        json_object=json.loads(script.text)
-        price = json_object["price"][0]['current']
 
-    # Color
-    itemcolor = None
-    color = []
-    for x in range(0,10):
-        try:
-            for script in soup.find_all('script', {'type': "text/javascript"}):
-                json_object=json.loads(script.text)
-                itemcolor = json_object["images"][x]['colour']
-            color.append(itemcolor)
-        except IndexError:
-            break
+    # # Price
+    # price = None
+    # for script in soup.find_all('script', {'type': "text/javascript"}):
+    #     json_object=json.loads(script.text)
+    #     price = json_object["price"][0]['current']
 
-    # Title
-    title_instances = soup.find_all("span", {"itemprop":"name"})
-    assert len(title_instances) < 2
-    title = title_instances[0].text
+    # # Color
+    # itemcolor = None
+    # color = []
+    # for x in range(0,10):
+    #     try:
+    #         for script in soup.find_all('script', {'type': "text/javascript"}):
+    #             json_object=json.loads(script.text)
+    #             itemcolor = json_object["images"][x]['colour']
+    #         color.append(itemcolor)
+    #     except IndexError:
+    #         break
 
-    # Description
-    detail = []
+    # # Title
+    # title_instances = soup.find_all("span", {"itemprop":"name"})
+    # assert len(title_instances) < 2
+    # title = title_instances[0].text
 
-    for item in soup.find_all({"class":"product-decription"}, "h4", "ul"):
-        for elem in item.find_all("li"):
-            detail.append(elem.text)
+    # # Description
+    # detail = []
 
-    # Categories
-    categories = ""
-    name = []
-    x = 0
-    for item in soup.find_all("breadcrumb:"):
-        if (x==1):
-            name = item.text.split(title)
-        else:
-            x = 1
+    # for item in soup.find_all({"class":"product-decription"}, "h4", "ul"):
+    #     for elem in item.find_all("li"):
+    #         detail.append(elem.text)
 
-    categories = name[0]
+    # # Categories
+    # categories = ""
+    # name = []
+    # x = 0
+    # for item in soup.find_all("breadcrumb:"):
+    #     if (x==1):
+    #         name = item.text.split(title)
+    #     else:
+    #         x = 1
 
-    final_object["annotation"] = {"categories": categories, "title": title, "color": color, "price": price,
-                                  "description": detail, "content": composition}
+    # categories = name[0]
 
-    return final_object, final_object['info']['id'], first_download_of_item
+    # final_object["annotation"] = {"categories": categories, "title": title, "color": color, "price": price,
+    #                               "description": detail, "content": composition}
+
+    # return final_object, final_object['info']['id'], first_download_of_item
 
 if __name__ == '__main__':
     print("done")
