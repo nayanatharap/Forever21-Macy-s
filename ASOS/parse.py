@@ -1,55 +1,113 @@
 import bs4 as bs
-from urllib.request import Request, urlopen
+from urllib.request import Request,urlopen
 import json, os
-import requests
 import subprocess
+import requests
+import time
+import logging
 
-product_link = "http://us.asos.com/asos/asos-design-scuba-asymmetric-ruffle-front-midi-dress/prd/9248481?clr=pink&SearchQuery=&cid=5235&gridcolumn=1&gridrow=1&gridsize=4&pge=1&pgesize=72&totalstyles=9751"
-output_path="./data"
-massive_json={}
-headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
+product_link = "http://us.asos.com/converse/converse-colorblock-sweatshirt-with-chest-branding/prd/9078163?clr=navy&SearchQuery=&cid=11321&gridcolumn=2&gridrow=2&gridsize=4&pge=1&pgesize=72&totalstyles=463"
+headers={
+		"User-Agent": "Mozilla/5.0"
+	}
 req = requests.get(product_link, headers=headers)
-sauce = urlopen(req).read()
+sauce = req.text
 soup = bs.BeautifulSoup(sauce, "lxml")
-final_object = {}
 
-composition = ""
-composition_string = []
-material = ""
-material_list = []
-materials = "Materials: "
-check = None
-try:
+final_object={}
+
+def is_number(x):
     try:
-        check = soup.find_all("h4","ABOUT ME", "span", "br")
-    except Exception:
-        check = soup.find_all("h4","ABOUT ME", "span")
-except Exception:
-        composition = "N/A" 
-        composition_string = "N/A"
+        float(x)
+        return True
+    except (ValueError):
+        return False
 
-for item in check:
-    try:   
-        material += item.text
-        try:
-            material_list = material.split(", ")
-        except Exception:
-            material_list.append(material)
+# # Color
+# color = ""
+# whole = ""
+# section1 = ""
+# section2 = ""
 
-        for elem in material_list:
-            try:
-                elem.split(": ")[1]
-            except Exception:
-                pass
-        for elem in material_list:
-            materials += elem.split("% ")[1]
-            composition += elem.split("% ")[0] + "%"
-        composition_string = [materials, "Composition: " + composition]
+# for item in soup.find_all("script", {"type":"text/javascript"}):
+#     whole += item.text
+# section1 = whole.split("colour")[1]
+# section2 = section1.split(":")[1]
+# color = section2.split(",")[0]
+# color = color.replace('"', "'", 2)
+# color = color.split("'")[1]
+# print(color)
 
-    except Exception:
-        composition = "N/A" 
-print(composition)
-print(composition_string)
 
-if __name__ == '__main__':
-    print("done")
+# # Attributes
+# attributes = []
+# for item in soup.find_all("div", {"class":"product-description"}):
+#     for elem in item.find_all("li"):
+#         attributes.append(elem.text)
+# print(attributes)
+
+
+# # Title and Brand
+# title = ""
+# brand = ""
+# variable = 0
+# for elem in soup.find_all("span", {"itemprop":"name"}):
+#     if variable == 1:
+#         title+=elem.text
+           
+#     else:
+#         brand+=elem.text
+#         variable = 1
+# title = title[:-4]
+
+# print(title)
+# print(brand)
+
+
+# # Composition and Composition String
+# percentage = []
+# composition = []
+# material_string = ""
+# material_list = []
+# composition_string = []
+# try:
+#     for item in soup.find_all("div", {"class":"about-me"}, "span"):
+#         material_string += item.text
+#         try:
+#             material_list = material_string.split(", ")
+#         except Exception:
+#             material_list.append(material)
+        
+        
+#         if is_number(material_list[0][0]) == False:
+#             material_list[0] = material_list[0].split(":")[1]
+#         material_list[0] = material_list[0].strip()
+#         material_list[-1] = material_list[-1].strip()
+        
+#         try:
+#             material_list[-1] = material_list[-1].split(".")[0]
+#         except Exception:
+#             pass
+        
+
+#         for elem in material_list:
+#             try:
+#                 elem = elem.split(": ")[1]
+#             except Exception:
+#                 pass
+#         for elem in material_list:
+#             temp = elem.split("% ")[1] 
+#             composition.append(temp.strip())
+#             temp1= elem.split("% ")[0] + " "
+#             percentage.append(temp1.strip())
+
+#     for x in range(0, len(composition)):
+#         composition_string.append(["Material: "+composition[x], "Percentage: "+percentage[x]])
+
+# except Exception:
+#     composition = "N/A"
+#     composition_string = "N/A"
+
+
+# print(composition)
+# print(composition_string)
