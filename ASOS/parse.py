@@ -22,6 +22,14 @@ def is_number(x):
         return True
     except (ValueError):
         return False
+
+# # Description
+# description = ""
+# for item in soup.find_all("div", {"class":"brand-description"}):
+#     for elem in item.find_all("span"):
+#         description += elem.text
+# print(description)
+
 # Price
 # price = []
 # price_string = []
@@ -50,6 +58,7 @@ def is_number(x):
 # price.append("Sale: $" + sale.strip())
 # print(price)
 
+
 # # Color
 # color = ""
 # whole = ""
@@ -67,25 +76,34 @@ def is_number(x):
 
 
 # # Attributes
-# attributes = []
+# product_name = ""
+# attributes0 = ""
+# attributes1 = []
+# x = 0
 # for item in soup.find_all("div", {"class":"product-description"}):
+#     for elem in item.find_all("strong"):
+#         product_name += elem.text + " by "
+    
+#     attributes0 = product_name[:-4]
+    
 #     for elem in item.find_all("li"):
-#         attributes.append(elem.text)
-# print(attributes)
+#         attributes1.append(elem.text)
+# print(attributes0)
+# print(attributes1)
 
 
-# # Title and Brand
-# title = ""
-# brand = ""
-# variable = 0
-# for elem in soup.find_all("span", {"itemprop":"name"}):
-#     if variable == 1:
-#         title+=elem.text
+# Title and Brand
+title = ""
+brand = ""
+variable = 0
+for elem in soup.find_all("span", {"itemprop":"name"}):
+    if variable == 1:
+        title+=elem.text
            
-#     else:
-#         brand+=elem.text
-#         variable = 1
-# title = title[:-4]
+    else:
+        brand+=elem.text
+        variable = 1
+title = title[:-4]
 
 # print(title)
 # print(brand)
@@ -135,6 +153,16 @@ def is_number(x):
 #     composition = "N/A"
 #     composition_string = "N/A"
 
-
 # print(composition)
 # print(composition_string)
+
+# # Categories
+# categories = []
+# category_string = ""
+# whole_string = ""
+# for item in soup.find_all("script", {"type":"text/javascript"}):
+#     whole_string += item.text
+# whole_string = whole_string.split("breadcrumb: '/")[1]
+# category_string = whole_string.split("',")[0]
+# categories = category_string.split("/")
+# print(categories)
