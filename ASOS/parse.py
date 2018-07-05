@@ -22,6 +22,33 @@ def is_number(x):
         return True
     except (ValueError):
         return False
+# Price
+# price = []
+# price_string = []
+# whole_text = ""
+# section1 = ""
+# section2 = ""
+# section3 = ""
+# original = ""
+# sale = ""
+# for item in soup.find_all("script", {"type":"text/javascript"}):
+#     whole_text += item.text
+# section1 = whole_text.split("price")[-1]
+# section2 = section1.split("rrp")[0]
+# section2 = section2.replace('"', " ")
+# section3 = section2.split("{")[1]
+# price_string = section3.split(",")[:-1]
+# for x in range(0,2):
+#     price_string[x] = price_string[x].split(":")[1]
+# if price_string[1]=="0.0":
+#     original = price_string[0]
+#     sale = "N/A"
+# else:
+#     original = price_string[1]  
+#     sale = price_string[0]
+# price.append("Original: $" + original.strip())
+# price.append("Sale: $" + sale.strip())
+# print(price)
 
 # # Color
 # color = ""
