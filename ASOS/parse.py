@@ -6,7 +6,7 @@ import requests
 import time
 import logging
 
-product_link = "http://us.asos.com/converse/converse-colorblock-sweatshirt-with-chest-branding/prd/9078163?clr=navy&SearchQuery=&cid=11321&gridcolumn=2&gridrow=2&gridsize=4&pge=1&pgesize=72&totalstyles=463"
+product_link = "http://us.asos.com/river-island/river-island-beach-blouse-with-tie-front-in-cream/prd/9867632?CTAref=Recently+Viewed&clr=cream"
 headers={
 		"User-Agent": "Mozilla/5.0"
 	}
@@ -92,18 +92,18 @@ def is_number(x):
 # print(attributes1)
 
 
-# Title and Brand
-title = ""
-brand = ""
-variable = 0
-for elem in soup.find_all("span", {"itemprop":"name"}):
-    if variable == 1:
-        title+=elem.text
+# # Title and Brand
+# title = ""
+# brand = ""
+# variable = 0
+# for elem in soup.find_all("span", {"itemprop":"name"}):
+#     if variable == 1:
+#         title+=elem.text
            
-    else:
-        brand+=elem.text
-        variable = 1
-title = title[:-4]
+#     else:
+#         brand+=elem.text
+#         variable = 1
+# title = title[:-4]
 
 # print(title)
 # print(brand)
@@ -115,6 +115,9 @@ title = title[:-4]
 # material_string = ""
 # material_list = []
 # composition_string = []
+# test = ""
+# content = []
+# percent = []
 # try:
 #     for item in soup.find_all("div", {"class":"about-me"}, "span"):
 #         material_string += item.text
@@ -123,36 +126,75 @@ title = title[:-4]
 #         except Exception:
 #             material_list.append(material)
         
-        
-#         if is_number(material_list[0][0]) == False:
-#             material_list[0] = material_list[0].split(":")[1]
-#         material_list[0] = material_list[0].strip()
-#         material_list[-1] = material_list[-1].strip()
-        
+#     test = material_list[0].split("ABOUT ME")[1]
+#     test = test.split(":")[0] + ":"
+#     test = test.strip()
+
+#     counter = 0
+#     for elem in test:
+#         if elem ==":":
+#             counter +=1
+
+#     for char in test:
+#         if char.isupper() == True:
+#             test = test[:test.find(char)] + "?" + test[test.find(char):]
+    
+#     if test[0] == '?':
+#         test = test[1:]
+#     content = test.split("?")
+
+#     if counter > 0:
+#         composition.append(content[-1])
+#         content = content[:-1]
+
+#     content_list = []
+#     for elem in content:
+#         content_list.append(elem.strip())
+#     content = content_list
+
+#     material_list[0] = material_list[0].strip()
+#     material_list[-1] = material_list[-1].strip()
+    
+#     try:
+#         material_list[-1] = material_list[-1].split(".")[0]
+#         material_list = material_list.split(content[-1])[1]
+#     except Exception:
+#         pass
+#     try:
+#         material_list[0] = material_list[0].split(composition[0])[1]
+#     except Exception:
+#         pass
+#     for elem in material_list:
+#         temp = elem.split("% ")[1] 
+#         composition_string.append(temp.strip())
+#         temp1= elem.split("% ")[0] + " "
 #         try:
-#             material_list[-1] = material_list[-1].split(".")[0]
+#             temp1 = temp1.split(content[-1])[1]
 #         except Exception:
 #             pass
-        
+#         try:
+#             temp_mat = temp1.split(":")[0] + ":"
+#             temp1 = temp1.split(": ")[1]
+#         except Exception:
+#             temp_mat = ""
 
-#         for elem in material_list:
-#             try:
-#                 elem = elem.split(": ")[1]
-#             except Exception:
-#                 pass
-#         for elem in material_list:
-#             temp = elem.split("% ")[1] 
-#             composition.append(temp.strip())
-#             temp1= elem.split("% ")[0] + " "
-#             percentage.append(temp1.strip())
-
-#     for x in range(0, len(composition)):
-#         composition_string.append(["Material: "+composition[x], "Percentage: "+percentage[x]])
+#         percentage.append(temp_mat)
+#         percentage.append(temp1.strip())
+#         percent.append(temp1.strip())
+#     y = 0
+#     for x in range(0, len(percentage)):  
+#         if percentage[x] == "":
+#             pass
+#         elif is_number(percentage[x]) == True:
+#             composition.append(["Material: " + composition_string[y], "Percentage: " + percent[y]])
+#             y+=1
+#         else:
+#             composition.append(percentage[x])  
 
 # except Exception:
 #     composition = "N/A"
 #     composition_string = "N/A"
-
+# print(content)
 # print(composition)
 # print(composition_string)
 
